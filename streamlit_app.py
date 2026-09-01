@@ -1,6 +1,7 @@
 import streamlit as st
 import tempfile
 import os
+import base64
 from datetime import datetime
 
 from main import process_pdf
@@ -12,12 +13,35 @@ st.set_page_config(
     layout="centered",
 )
 
-# ---------- ستايل بسيط ----------
-st.markdown(
+
+def _img_to_base64(path):
+    with open(path, "rb") as f:
+        return base64.b64encode(f.read()).decode()
+
+
+# ---------- خلفية بصورة (شعار IATA كـ watermark فاتح فوق خلفية غامقة) ----------
+_bg_path = "assets/background.png"
+_bg_css = ""
+if os.path.isfile(_bg_path):
+    _bg_b64 = _img_to_base64(_bg_path)
+    _bg_css = f"""
+    .stApp {{
+        background-color: #0e1117;
+        background-image:
+            linear-gradient(rgba(14,17,23,0.88), rgba(14,17,23,0.88)),
+            url("data:image/png;base64,{_bg_b64}");
+        background-repeat: no-repeat;
+        background-position: center 40%;
+        background-size: 55% auto;
+        background-attachment: fixed;
+    }}
     """
+
+st.markdown(
+    f"""
     <style>
-    .stApp { background-color: #0e1117; }
-    .main-title { color: #ffffff; font-size: 28px; font-weight: 700; }
+    {_bg_css if _bg_css else ".stApp { background-color: #0e1117; }"}
+    .main-title {{ color: #ffffff; font-size: 28px; font-weight: 700; }}
     </style>
     """,
     unsafe_allow_html=True,
